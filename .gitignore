@@ -1,0 +1,30 @@
+<<<<<<< HEAD
+.metadata/*
+.recommenders/*
+.classpath
+.project
+.DS_Store
+
+*.aux
+*.log
+*.synctex.gz
+
+=======
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+!*dependencies.jar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+CMakeLists.txt
+*.idea
+*.iml
+>>>>>>> 4a863710802e826f6e0f86c4f38c82e87e2fcfcf
