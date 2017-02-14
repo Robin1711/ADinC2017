@@ -3,6 +3,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
 const int ALPHNUM = 26; //The number of letters in the alphabet
 
@@ -85,6 +86,5 @@ int main(int argc, char **argv){
 	//Free all memory used.
 	free2D(sentences, n);
 	free2D(testSentences, m);
-
 	return 0;
 }

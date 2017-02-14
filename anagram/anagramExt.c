@@ -9,8 +9,6 @@
 const int ALPHNUM = 26; //The number of letters in the alphabet
 const int MAXSTRING = 100;
 
-
-
 //Extend program functions:
 char **allocate2DChar(int rows, int columns){
 	char **new;
@@ -74,8 +72,6 @@ void readInput(int **histAr, char **charAr, int rows){
 		readSentence(histAr[row], charAr[row], MAXSTRING);
 	}
 }
-
-
 
 //Determine whether or not 2 arrays are equal. (all values are the same)
 int isEqual(int *ar, int *otherAr, int length){
