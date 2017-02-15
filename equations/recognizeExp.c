@@ -59,7 +59,8 @@ int acceptCharacter(List *lp, char c) {
  * When that is the case, they yield the value 1 and the pointer points to the rest of
  * the token list. Otherwise they yield 0 and the pointer remains unchanged.
  */
-int acceptFactor(List *lp) { 
+// <factor>     ::= <number> | <identifier> | '(' <expression> ')'
+int acceptFactor(List *lp) {
   return acceptNumber(lp) 
     || acceptIdentifier(lp) 
     || ( acceptCharacter(lp,'(') 
@@ -68,6 +69,7 @@ int acceptFactor(List *lp) {
     );
 }
 
+// <term>       ::= <factor> { '*' <factor> | '/' <factor> }
 int acceptTerm(List *lp) {
   if ( !acceptFactor(lp) ) {
     return 0;
@@ -80,6 +82,7 @@ int acceptTerm(List *lp) {
   return 1;
 }
 
+// <expression>  ::= <term> { '+'  <term> | '-' <term> }
 int acceptExpression(List *lp) {
   if ( !acceptTerm(lp) ) {
     return 0; 
@@ -92,26 +95,31 @@ int acceptExpression(List *lp) {
   return 1;
 }
 
+// <equationn>  ::= <expression> '=' <expression>
+int acceptEquation(List *lp) {
+  return (acceptExpression(lp) && acceptCharacter(lp,'=') && acceptExpression(lp));
+}
+
 /* The next function can be used to demonstrate the recognizer.
  */
-void recognizeExpressions() {
+void recognizeEquations() {
   char *ar;
-  List tl, tl1;  
-  printf("give an expression: ");
+  List tl, tl1;
+  printf("give an equation: ");
   ar = readInput();
   while (ar[0] != '!') {
-    tl = tokenList(ar); 
+    tl = tokenList(ar);
     printf("the token list is ");
     printList(tl);
     tl1 = tl;
-    if (acceptExpression(&tl1) && tl1 == NULL) {
-      printf("this is an expression\n"); 
+    if (acceptEquation(&tl1) && tl1 == NULL) {
+      printf("this is an equation\n");
     } else {
-      printf("this is not an expression\n"); 
+      printf("this is not an equation\n");
     }
     free(ar);
     freeTokenList(tl);
-    printf("\ngive an expression: ");
+    printf("\ngive an equation: ");
     ar = readInput();
   }
   free(ar);
