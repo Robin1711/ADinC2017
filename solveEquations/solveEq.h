@@ -15,7 +15,7 @@ int isEqual(char *ar1, char*ar2, int size);
 int isOneVar(List *lp);
 int max(int a, int b);
 int degree(List *lp);
-void recognizeEquations();
+void solveEquations();
 
 
 

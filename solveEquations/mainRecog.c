@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <math.h>
 #include "scanner.h"
-#include "recognizeExp.h"
+#include "solveEq.h"
 
 int main(int argc, char *argv[]) {
-  recognizeEquations();
+  solveEquations();
   return 0;
 }
