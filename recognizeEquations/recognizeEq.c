@@ -44,7 +44,6 @@ const int FALSE = 0;
  */
 
 int acceptNumber(List *lp) {
-  // fprintf(stderr, "acceptNumber\n");
   if (*lp != NULL && (*lp)->tt == Number) {
     *lp = (*lp)->next;
     return 1;
@@ -53,7 +52,6 @@ int acceptNumber(List *lp) {
 }
 
 int acceptIdentifier(List *lp) {
-  // fprintf(stderr, "acceptIdentifier\n");
   if (*lp != NULL && (*lp)->tt == Identifier ) {
     *lp = (*lp)->next;
     return 1;
@@ -62,7 +60,6 @@ int acceptIdentifier(List *lp) {
 }
 
 int acceptCharacter(List *lp, char c) {
-  // fprintf(stderr, "acceptChar: %c\n", c);
   if (*lp != NULL && (*lp)->tt == Symbol && ((*lp)->t).symbol == c ) {
     *lp = (*lp)->next;
     return 1;
@@ -70,15 +67,14 @@ int acceptCharacter(List *lp, char c) {
   return 0;
 }
 
-/* The functions acceptFactor, acceptTerm and acceptExpression have as
+/* The functions acceptEquation, acceptTerm and acceptExpression have as
  * argument a pointer to a token list. They check whether the token list
- * has an initial segment that can be recognized as factor, term or expression, respectively.
+ * has an initial segment that can be recognized as equation, term or expression, respectively.
  * When that is the case, they yield the value 1 and the pointer points to the rest of
  * the token list. Otherwise they yield 0 and the pointer remains unchanged.
  */
 
 int acceptTerm(List *lp) {
-  // fprintf(stderr, "acceptTerm\n");
   if ( !acceptNumber(lp) ) {
     return FALSE;
   }
@@ -95,7 +91,6 @@ int acceptTerm(List *lp) {
 }
 
 int acceptExpression(List *lp) {
-  // fprintf(stderr, "acceptExpression\n");
   if ( !( acceptTerm(lp) || (acceptCharacter(lp, '-') && acceptTerm(lp)) ) ) {
     return FALSE;
   }
@@ -120,6 +115,7 @@ int acceptEquation(List *lp){
   return TRUE;
 }
 
+/* The function isEqual checks whether two arrays are equal */
 int isEqual(char *ar1, char*ar2, int size){
   int i;
   for(i=0; i<size; i++){
@@ -133,6 +129,7 @@ int isEqual(char *ar1, char*ar2, int size){
   return TRUE;
 }
 
+/* The function isOneVar checks whether the equation (given in list-form) contains one distinct variable or not */
 int isOneVar(List *lp){
   int varFound = FALSE;
   char *var = NULL;
@@ -151,13 +148,12 @@ int isOneVar(List *lp){
   }
   return varFound;
 }
-/* The next function can be used to demonstrate the recognizer.
- */
 
 int max(int a, int b){
   return (a > b) ? a : b;
 }
 
+/* The function returns the degree of the equation (given in list-form) */
 int degree(List *lp){
   int degree = -100;
   while(*lp != NULL){

@@ -17,6 +17,15 @@
  * structure of the BNF grammar.
  */
 
+/* The grammar implemented after the modification
+ * <equation>   ::= <expression> '=' <expression>
+ *
+ * <expression> ::= <term> { '+'  <term> | '-' <term> }
+ *                | '-' <term> { '+'  <term> | '-' <term> }
+ *
+ * <term>       ::= <natnum> | <natnum> <identifier> | <natnum> <identifier> '^' <natnum>
+*/
+
 #include <stdio.h>  /* getchar, printf */
 #include <stdlib.h> /* NULL */
 #include <math.h> /* sqrt */
@@ -34,6 +43,7 @@ const int FALSE = 0;
  * When that is the case, they yield the value 1 and the pointer points to the rest of
  * the token list. Otherwise they yield 0 and the pointer remains unchanged.
  */
+
 int valueNumber(List *lp, double *wp) {
   if (*lp != NULL && (*lp)->tt == Number) {
     *wp = ((*lp)->t).number;
@@ -44,7 +54,6 @@ int valueNumber(List *lp, double *wp) {
 }
 
 int acceptNumber(List *lp) {
-  // fprintf(stderr, "acceptNumber\n");
   if (*lp != NULL && (*lp)->tt == Number) {
     *lp = (*lp)->next;
     return 1;
@@ -53,7 +62,6 @@ int acceptNumber(List *lp) {
 }
 
 int acceptIdentifier(List *lp) {
-  // fprintf(stderr, "acceptIdentifier\n");
   if (*lp != NULL && (*lp)->tt == Identifier) {
     *lp = (*lp)->next;
     return 1;
@@ -62,7 +70,6 @@ int acceptIdentifier(List *lp) {
 }
 
 int acceptCharacter(List *lp, char c) {
-  // fprintf(stderr, "acceptChar: %c\n", c);
   if (*lp != NULL && (*lp)->tt == Symbol && ((*lp)->t).symbol == c) {
     *lp = (*lp)->next;
     return 1;
@@ -70,24 +77,14 @@ int acceptCharacter(List *lp, char c) {
   return 0;
 }
 
-/* The functions acceptFactor, acceptTerm and acceptExpression have as
+/* The functions acceptEquation, acceptTerm and acceptExpression have as
  * argument a pointer to a token list. They check whether the token list
- * has an initial segment that can be recognized as factor, term or expression, respectively.
+ * has an initial segment that can be recognized as equation, term or expression, respectively.
  * When that is the case, they yield the value 1 and the pointer points to the rest of
  * the token list. Otherwise they yield 0 and the pointer remains unchanged.
  */
 
-int acceptFactor(List *lp) {
-  return acceptNumber(lp)
-         || acceptIdentifier(lp)
-         || (acceptCharacter(lp, '(')
-             && acceptExpression(lp)
-             && acceptCharacter(lp, ')')
-         );
-}
-
 int acceptTerm(List *lp) {
-  // fprintf(stderr, "acceptTerm\n");
   if (!acceptNumber(lp)) {
     return FALSE;
   }
@@ -104,7 +101,6 @@ int acceptTerm(List *lp) {
 }
 
 int acceptExpression(List *lp) {
-  // fprintf(stderr, "acceptExpression\n");
   if (!(acceptTerm(lp) || (acceptCharacter(lp, '-') && acceptTerm(lp)))) {
     return FALSE;
   }
@@ -129,6 +125,7 @@ int acceptEquation(List *lp) {
   return TRUE;
 }
 
+/* The function isEqual checks whether two arrays are equal */
 int isEqual(char *ar1, char *ar2, int size) {
   int i;
   for (i = 0; i < size; i++) {
@@ -142,6 +139,7 @@ int isEqual(char *ar1, char *ar2, int size) {
   return TRUE;
 }
 
+/* The function isOneVar checks whether the equation (given in list-form) contains one distinct variable or not */
 int isOneVar(List *lp) {
   int varFound = FALSE;
   char *var;
@@ -161,15 +159,13 @@ int isOneVar(List *lp) {
   return varFound;
 }
 
-/* The next function can be used to demonstrate the recognizer.
- */
-
 int max(int a, int b) {
   return (a > b) ? a : b;
 }
 
+/* The function returns the degree of the equation (given in list-form) */
 int degree(List *lp) {
-  int degree = -100;
+  int degree = 0;
   while (*lp != NULL) {
     if (acceptIdentifier(lp)) {
       if (*lp != NULL && acceptCharacter(lp, '^')) {
@@ -185,6 +181,7 @@ int degree(List *lp) {
   return degree;
 }
 
+/* The function checkDeg checks the degree of a term in the equation (given in list-form) */
 int checkDeg(List *lp) {
   double val;
   if (acceptIdentifier(lp)) {
@@ -208,6 +205,8 @@ double round(double n) {
   }
 }
 
+/* The function getABC gets as input an equation in list-form and an array with length 3
+ * The function returns a filled array with the values for a, b and c as in (ax^2 + bx + c) */
 void getABC(List *lp, double *vars) {
   double val;
   int deg, foundEquals, minus;
@@ -229,21 +228,11 @@ void getABC(List *lp, double *vars) {
   }
 }
 
-void solveLinear(List *lp) {
-  double *vars;
-  vars = calloc(3, sizeof(double));//<<CONSTANT
-  getABC(lp, vars);
-  if (vars[1] == 0) {
-    printf("not solvable\n");
-  } else {
-    printf("solution: %.3lf\n", round(-1 * vars[0] / vars[1]));
-  }
-  free(vars);
-}
-
+/* The function abcFormula calculates the Discriminant and then performs the abc-formula
+ * when d > 0 and it is a second degree equation. Otherwise it will calculate the linear solution
+ * The function prints the result(s) */
 void abcFormula(double a, double b, double c) {
   double d = (b * b) - (4 * a * c);
-//  printf("a = %.3lf\nb = %.3lf\nc = %.3lf\nd = %.3lf\n", a, b, c, d);
   if (d > 0 && a != 0) {
     double sol1 = (-1 * b - sqrt(d)) / (2 * a);
     double sol2 = (-1 * b + sqrt(d)) / (2 * a);
@@ -251,20 +240,21 @@ void abcFormula(double a, double b, double c) {
     sol2 = round(sol2);
     printf("solutions: ");
     (sol1 < sol2) ? printf("%.3lf %.3lf\n", sol2, sol1) : printf("%.3lf %.3lf\n", sol1, sol2);
-  } else if (d == 0) {
+  } else if (d == 0 && a != 0) {    //<< if d=0 only one solution
     printf("solution: %.3lf\n", (-1 * b) / (2 * a));
-  } else if (a == 0) {
+  } else if (a == 0) {              //<< if the equation is linear
     printf("solution: %.3lf\n", round(-1 * c / b));
   } else {
     printf("not solvable\n");
   }
 }
 
-void solveQuadratic(List *lp) {
+/* The function solveEq will get an equation and it will calculate the result(s) of the equation */
+void solveEq(List *lp) {
   double *vars;
   vars = calloc(3, sizeof(double));//<<CONSTANT
   getABC(lp, vars);
-  if (vars[2] == 0 && vars[1] == 0) {
+  if (vars[2] == 0 && vars[1] == 0) { //<< if constant = 0
     printf("not solvable\n");
   } else {
     abcFormula(vars[2], vars[1], vars[0]);
@@ -289,10 +279,8 @@ void solveEquations() {
         int deg = degree(&tl1);
         tl1 = tl;
         printf(" in 1 variable of degree %d\n", deg);
-        if (deg == 1) {
-          solveLinear(&tl1);
-        } else if (deg == 2) {
-          solveQuadratic(&tl1);
+        if (deg == 1 || deg == 2) {
+          solveEq(&tl1);
         }
       } else {
         printf(", but not in 1 variable\n");
